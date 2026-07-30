@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import { AlertTriangle, Activity, CheckCircle, ShieldAlert } from 'lucide-react';
 import { StatCard } from '../components/common/StatCard';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { CommanderAPI } from '../services/commanderAPI';
 
 const mockChartData = [
   { time: '08:00', risk: 20 },
@@ -13,6 +15,16 @@ const mockChartData = [
 ];
 
 export function HomeDashboard() {
+  const [tasks, setTasks] = useState<any[]>([]);
+
+  useEffect(() => {
+    CommanderAPI.getActiveTasks().then(data => {
+      if (data && data.tasks) {
+        setTasks(data.tasks);
+      }
+    });
+  }, []);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -63,12 +75,12 @@ export function HomeDashboard() {
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm">
           <h3 className="text-lg font-semibold mb-6">Pending Tasks</h3>
           <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="flex gap-4 items-start p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition-colors border border-slate-100 dark:border-slate-800">
+            {tasks.map((task, i) => (
+              <div key={task.id || i} className="flex gap-4 items-start p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition-colors border border-slate-100 dark:border-slate-800">
                 <div className="w-2 h-2 mt-2 bg-blue-500 rounded-full shrink-0"></div>
                 <div>
-                  <p className="text-sm font-medium text-slate-900 dark:text-slate-200">Awaiting Cyber Agent Response</p>
-                  <p className="text-xs text-slate-500 mt-1">Workflow ID: WF-847291</p>
+                  <p className="text-sm font-medium text-slate-900 dark:text-slate-200">{task.description}</p>
+                  <p className="text-xs text-slate-500 mt-1">Workflow ID: {task.id}</p>
                 </div>
               </div>
             ))}

@@ -9,10 +9,10 @@ export const CommanderAPI = {
     return res.json();
   },
   triggerCrisis: async (description: string, severity: string) => {
-    const res = await fetch(`${BASE_URL}/commander/crisis`, {
+    const res = await fetch(`${BASE_URL}/workflow/start`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ description, severity })
+      body: JSON.stringify({ title: "New Generated Crisis", description, severity })
     });
     return res.json();
   },
@@ -26,6 +26,10 @@ export const CommanderAPI = {
   },
   getOnlineAgents: async () => {
     const res = await fetch(`${BASE_URL}/commander/agents`);
+    return res.json();
+  },
+  getActiveTasks: async () => {
+    const res = await fetch(`${BASE_URL}/commander/workflows/active`);
     return res.json();
   }
 };

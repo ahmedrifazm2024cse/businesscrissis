@@ -1,111 +1,69 @@
-import { NavLink } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
-  Briefcase, 
-  Activity, 
-  Network, 
-  FileText, 
-  HeartPulse, 
+  Users, 
+  AlertTriangle, 
+  FileBarChart, 
+  MessageSquare,
   Settings,
-  BrainCircuit,
-  Database,
-  Globe,
-  DollarSign,
-  Truck,
-  ShieldAlert,
-  Scale
+  Bell,
+  Shield,
+  FileText
 } from 'lucide-react';
+import clsx from 'clsx';
 
 const navItems = [
-  { path: '/', label: 'Home', icon: LayoutDashboard },
-  { path: '/executive', label: 'Executive', icon: Briefcase },
-  { path: '/system/workflow', label: 'Workflow', icon: Network },
-  { path: '/system/monitor', label: 'Agents', icon: Activity },
-  { path: '/system/memory', label: 'Memory', icon: Database },
-  { path: '/reports', label: 'Reports', icon: FileText },
-  { path: '/knowledge', label: 'Knowledge', icon: BrainCircuit },
-];
-
-const agentItems = [
-  { path: '/agent/customer', label: 'Customer', icon: Globe },
-  { path: '/agent/market', label: 'Market', icon: Globe },
-  { path: '/agent/financial', label: 'Financial', icon: DollarSign },
-  { path: '/agent/supply', label: 'Supply Chain', icon: Truck },
-  { path: '/agent/cyber', label: 'Cyber Security', icon: ShieldAlert },
-  { path: '/agent/legal', label: 'Legal', icon: Scale },
+  { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
+  { icon: Users, label: 'Agents Workspace', href: '/dashboard/agents' },
+  { icon: AlertTriangle, label: 'Crisis Center', href: '/dashboard/crisis' },
+  { icon: Shield, label: 'Admin Panel', href: '/dashboard/admin' },
+  { icon: FileBarChart, label: 'Analytics', href: '/dashboard/analytics' },
+  { icon: FileText, label: 'Reports', href: '/dashboard/reports' },
+  { icon: MessageSquare, label: 'AI Chat', href: '/dashboard/chat' },
 ];
 
 export function Sidebar() {
+  const location = useLocation();
+
   return (
-    <aside className="w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col h-full overflow-y-auto">
+    <aside className="w-64 border-r border-border bg-card flex flex-col">
       <div className="p-6">
-        <div className="flex items-center gap-2 text-primary font-bold text-xl">
-          <BrainCircuit className="w-6 h-6" />
-          <span>Agentverse</span>
-        </div>
-      </div>
-      
-      <div className="px-4 py-2">
-        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 px-2">Dashboards</p>
-        <nav className="flex flex-col gap-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
-                    isActive 
-                      ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400 font-medium' 
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-slate-50'
-                  }`
-                }
-              >
-                <Icon className="w-4 h-4" />
-                <span className="text-sm">{item.label}</span>
-              </NavLink>
-            );
-          })}
-        </nav>
+        <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300 flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/50 shadow-[0_0_15px_rgba(37,99,235,0.2)]">
+            <LayoutDashboard className="w-4 h-4 text-primary" />
+          </div>
+          Commander AI
+        </h1>
       </div>
 
-      <div className="px-4 py-4 mt-2 border-t border-slate-100 dark:border-slate-800/50">
-        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 px-2">Business Agents</p>
-        <nav className="flex flex-col gap-1">
-          {agentItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
-                    isActive 
-                      ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-400 font-medium' 
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-slate-50'
-                  }`
-                }
-              >
-                <Icon className="w-4 h-4" />
-                <span className="text-sm">{item.label}</span>
-              </NavLink>
-            );
-          })}
-        </nav>
-      </div>
+      <nav className="flex-1 px-4 space-y-2 mt-4">
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.href;
+          return (
+            <Link
+              key={item.href}
+              to={item.href}
+              className={clsx(
+                'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200',
+                isActive 
+                  ? 'bg-primary/10 text-primary border border-primary/20 shadow-sm' 
+                  : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+              )}
+            >
+              <item.icon className={clsx("w-5 h-5", isActive ? "text-primary" : "text-muted-foreground")} />
+              {item.label}
+            </Link>
+          );
+        })}
+      </nav>
 
-      <div className="mt-auto px-4 py-4 border-t border-slate-200 dark:border-slate-800">
-        <nav className="flex flex-col gap-1">
-          <NavLink to="/system/health" className="flex items-center gap-3 px-3 py-2 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">
-            <HeartPulse className="w-4 h-4" />
-            <span className="text-sm">System Health</span>
-          </NavLink>
-          <NavLink to="/settings" className="flex items-center gap-3 px-3 py-2 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">
-            <Settings className="w-4 h-4" />
-            <span className="text-sm">Settings</span>
-          </NavLink>
-        </nav>
+      <div className="p-4 border-t border-border space-y-2">
+        <Link to="/dashboard/notifications" className="w-full flex items-center gap-3 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <Bell className="w-4 h-4" /> Notifications
+        </Link>
+        <Link to="/dashboard/settings" className="w-full flex items-center gap-3 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <Settings className="w-4 h-4" /> Settings
+        </Link>
       </div>
     </aside>
   );

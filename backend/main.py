@@ -2,7 +2,7 @@ import os
 import sys
 import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 
 # Ensure the root project directory is in the sys path
@@ -12,9 +12,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 
-from backend.database.mongodb import init_db
-from backend.shared.eventbus import eventbus
-from backend.shared.memory import memory
+from app.database.mongodb import init_db
+from app.api.main import api_router
+from app.websocket.manager import manager
+from app.middleware.logging import LoggingMiddleware
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -28,8 +29,7 @@ async def lifespan(app: FastAPI):
     # Initialize unified database connection
     app.state.db_client = await init_db()
     
-    # Here we would initialize/register agents dynamically
-    logger.info("Database and agents initialized successfully.")
+    logger.info("Database initialized successfully.")
     
     yield
     
@@ -55,19 +55,41 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-try:
-    from backend.commander.router import router as commander_router
-    app.include_router(commander_router, prefix="/api/commander", tags=["Commander"])
-except Exception as e:
-    logger.error(f"Failed to load commander_router: {e}")
+# Custom Logging Middleware
+app.add_middleware(LoggingMiddleware)
+
+# Include the main API router
+app.include_router(api_router, prefix="/api")
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            # Handle incoming WS messages if needed
+    except Exception as e:
+        logger.info(f"WebSocket disconnected: {e}")
+    finally:
+        manager.disconnect(websocket)
 
 @app.get("/")
 async def root():
     return {
         "status": "online",
-        "message": "Welcome to the Autonomous Business Commander AI."
+        "message": "Welcome to the Autonomous Business Commander AI.",
+        "version": "2.0"
+    }
+
+@app.get("/api/health")
+async def get_health():
+    return {
+        "status": "online",
+        "commander": "active",
+        "agents_registered": 13
     }
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("backend.main:app", host="0.0.0.0", port=8000, reload=True)
+    # Make sure we run from the backend directory context
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

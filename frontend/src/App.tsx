@@ -1,62 +1,48 @@
-import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
-import { Sidebar } from './components/layout/Sidebar';
-import { Navbar } from './components/layout/Navbar';
-import { AIAssistantPanel } from './components/layout/AIAssistantPanel';
-
-function DashboardLayout() {
-  return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900 font-sans text-slate-900 dark:text-slate-100">
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 relative">
-        <Navbar />
-        <main className="flex-1 overflow-auto p-6 relative">
-          <Outlet />
-        </main>
-        <AIAssistantPanel />
-      </div>
-    </div>
-  );
-}
-
-import { HomeDashboard } from './pages/HomeDashboard';
-import { ExecutiveDashboard } from './pages/ExecutiveDashboard';
-import { WorkflowMonitor } from './pages/WorkflowMonitor';
-import { AgentMonitor } from './pages/AgentMonitor';
-import PresentationMode from './pages/PresentationMode';
-import { WebSocketProvider } from './contexts/WebSocketContext';
-import { Reports } from './pages/Reports';
-import { Notifications } from './pages/Notifications';
-import { Analytics } from './pages/Analytics';
-import { Settings } from './pages/Settings';
-import { KnowledgeBase } from './pages/KnowledgeBase';
-import { MemoryMonitor } from './pages/MemoryMonitor';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { MainLayout } from './components/layout/MainLayout';
+import { LandingPage } from './pages/LandingPage';
+import { ExecutiveDashboard } from './pages/dashboard/ExecutiveDashboard';
+import { MultiAgentWorkspace } from './pages/agents/MultiAgentWorkspace';
+import { WorkflowVisualization } from './pages/dashboard/WorkflowVisualization';
+import { CrisisCommandCenter } from './pages/dashboard/CrisisCommandCenter';
+import { Analytics } from './pages/analytics/Analytics';
+import { Reports } from './pages/reports/Reports';
+import { AIChat } from './pages/chat/AIChat';
+import { Notifications } from './pages/notifications/Notifications';
+import { Settings } from './pages/settings/Settings';
+import { AdminPanel } from './pages/admin/AdminPanel';
+import { useEffect } from 'react';
+import { useCommanderStore } from './store/useCommanderStore';
 
 function App() {
+  const { connectWebSocket } = useCommanderStore();
+
+  useEffect(() => {
+    // Initiate WebSocket connection on app load
+    connectWebSocket();
+  }, [connectWebSocket]);
+
   return (
-    <WebSocketProvider>
-      <Router>
-        <Routes>
-          <Route path="/login" element={<div>Login Page</div>} />
-          
-          <Route element={<DashboardLayout />}>
-            <Route path="/" element={<HomeDashboard />} />
-            <Route path="/executive" element={<ExecutiveDashboard />} />
-            <Route path="/system/workflow" element={<WorkflowMonitor />} />
-            <Route path="/system/monitor" element={<AgentMonitor />} />
-            <Route path="/presentation" element={<PresentationMode />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/notifications" element={<Notifications />} />
-            <Route path="/analytics" element={<Analytics />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/knowledge" element={<KnowledgeBase />} />
-            <Route path="/system/memory" element={<MemoryMonitor />} />
-            <Route path="/agent/:agentName" element={<AgentMonitor />} />
-            <Route path="/system/health" element={<AgentMonitor />} />
-            <Route path="*" element={<div>Page under construction.</div>} />
-          </Route>
-        </Routes>
-      </Router>
-    </WebSocketProvider>
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        
+        <Route path="/dashboard" element={<MainLayout />}>
+          <Route index element={<ExecutiveDashboard />} />
+          <Route path="agents" element={<MultiAgentWorkspace />} />
+          <Route path="crisis" element={<CrisisCommandCenter />} />
+          <Route path="workflow" element={<WorkflowVisualization />} />
+          <Route path="analytics" element={<Analytics />} />
+          <Route path="reports" element={<Reports />} />
+          <Route path="chat" element={<AIChat />} />
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="admin" element={<AdminPanel />} />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
   );
 }
 
