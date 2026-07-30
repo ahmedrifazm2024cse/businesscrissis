@@ -1,0 +1,331 @@
+version: "3.8"
+
+networks:
+  agentverse-net:
+    driver: bridge
+
+services:
+  # ==========================================
+  # INFRASTRUCTURE SERVICES
+  # ==========================================
+  mongodb:
+    image: public.ecr.aws/docker/library/mongo:latest
+    ports:
+      - "27017:27017"
+    networks:
+      - agentverse-net
+
+  redis:
+    image: public.ecr.aws/docker/library/redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - agentverse-net
+  eventbus:
+    build: 
+      context: ../backend
+      dockerfile: Dockerfile.infra
+      args:
+        - SERVICE_NAME=eventbus
+    ports:
+      - "8009:8009"
+    networks:
+      - agentverse-net
+
+  memory:
+    build: 
+      context: ../backend
+      dockerfile: Dockerfile.infra
+      args:
+        - SERVICE_NAME=memory
+    networks:
+      - agentverse-net
+
+  workflow:
+    build: 
+      context: ../backend
+      dockerfile: Dockerfile.infra
+      args:
+        - SERVICE_NAME=workflow
+    networks:
+      - agentverse-net
+    environment:
+      - COMMANDER_URL=http://commander:8000
+
+  communication:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile.infra
+      args:
+        - SERVICE_NAME=communication
+    ports:
+      - "8104:8104"
+    networks:
+      - agentverse-net
+
+  # ==========================================
+  # NEW ENTERPRISE SERVICES
+  # ==========================================
+  security:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile.infra
+      args:
+        - SERVICE_NAME=security
+    ports:
+      - "8105:8105"
+    networks:
+      - agentverse-net
+      
+  monitoring:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile.infra
+      args:
+        - SERVICE_NAME=monitoring
+    ports:
+      - "8101:8101"
+    networks:
+      - agentverse-net
+
+  audit:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile.infra
+      args:
+        - SERVICE_NAME=audit
+    networks:
+      - agentverse-net
+
+  # ==========================================
+  # BUSINESS AGENTS
+  # ==========================================
+  customer-agent:
+    build: 
+      context: ..
+      dockerfile: Customer_Reputation/Backend/Dockerfile
+    env_file:
+      - ../Customer_Reputation/Backend/.env
+    environment:
+      - COMMANDER_URL=http://commander:8000
+      - EVENT_BUS_URL=http://eventbus:8009/api/eventbus/publish
+      - MEMORY_URL=http://memory:8102/api/memory
+      - MONGODB_URI=mongodb://mongodb:27017
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - agentverse-net
+
+  market-agent:
+    build: 
+      context: ..
+      dockerfile: market-intelligence-agent/backend/Dockerfile
+    env_file:
+      - ../market-intelligence-agent/backend/.env
+    environment:
+      - COMMANDER_URL=http://commander:8000
+      - EVENT_BUS_URL=http://eventbus:8009/api/eventbus/publish
+      - MEMORY_URL=http://memory:8102/api/memory
+      - MONGODB_URI=mongodb://mongodb:27017
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - agentverse-net
+
+  cyberagent:
+    build: 
+      context: ..
+      dockerfile: cyberagent/backend/Dockerfile
+    env_file:
+      - ../cyberagent/.env
+    environment:
+      - COMMANDER_URL=http://commander:8000
+      - EVENT_BUS_URL=http://eventbus:8009/api/eventbus/publish
+      - MEMORY_URL=http://memory:8102/api/memory
+      - MONGODB_URI=mongodb://mongodb:27017
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - agentverse-net
+
+  financialagent:
+    build: 
+      context: ..
+      dockerfile: financialagent/backend/Dockerfile
+    env_file:
+      - ../financialagent/.env
+    environment:
+      - COMMANDER_URL=http://commander:8000
+      - EVENT_BUS_URL=http://eventbus:8009/api/eventbus/publish
+      - MEMORY_URL=http://memory:8102/api/memory
+      - MONGODB_URI=mongodb://mongodb:27017
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - agentverse-net
+
+  legalcomplainaceagent:
+    build: 
+      context: ..
+      dockerfile: legalcomplainaceagent/backend/Dockerfile
+    env_file:
+      - ../legalcomplainaceagent/.env
+    environment:
+      - COMMANDER_URL=http://commander:8000
+      - EVENT_BUS_URL=http://eventbus:8009/api/eventbus/publish
+      - MEMORY_URL=http://memory:8102/api/memory
+      - MONGODB_URI=mongodb://mongodb:27017
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - agentverse-net
+
+  supllyagent:
+    build: 
+      context: ..
+      dockerfile: supllyagent/backend/Dockerfile
+    env_file:
+      - ../supllyagent/.env
+    environment:
+      - COMMANDER_URL=http://commander:8000
+      - EVENT_BUS_URL=http://eventbus:8009/api/eventbus/publish
+      - MEMORY_URL=http://memory:8102/api/memory
+      - MONGODB_URI=mongodb://mongodb:27017
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - agentverse-net
+
+  # ==========================================
+  # EXECUTIVE AGENTS
+  # ==========================================
+  communication-pr:
+    build:
+      context: ..
+      dockerfile: backend/executive_agents/Dockerfile.executive
+      args:
+        - AGENT_DIR=backend/executive_agents/communication_pr
+    environment:
+      - COMMANDER_URL=http://commander:8000
+      - EVENT_BUS_URL=http://eventbus:8009/api/eventbus/publish
+      - MEMORY_URL=http://memory:8102/api/memory
+      - MONGODB_URI=mongodb://mongodb:27017
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - agentverse-net
+
+  decision-agent:
+    build:
+      context: ..
+      dockerfile: backend/executive_agents/Dockerfile.executive
+      args:
+        - AGENT_DIR=backend/executive_agents/decision
+    environment:
+      - COMMANDER_URL=http://commander:8000
+      - EVENT_BUS_URL=http://eventbus:8009/api/eventbus/publish
+      - MEMORY_URL=http://memory:8102/api/memory
+      - MONGODB_URI=mongodb://mongodb:27017
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - agentverse-net
+
+  knowledge-manager:
+    build:
+      context: ..
+      dockerfile: backend/executive_agents/Dockerfile.executive
+      args:
+        - AGENT_DIR=backend/executive_agents/knowledge_manager
+    environment:
+      - COMMANDER_URL=http://commander:8000
+      - EVENT_BUS_URL=http://eventbus:8009/api/eventbus/publish
+      - MEMORY_URL=http://memory:8102/api/memory
+      - MONGODB_URI=mongodb://mongodb:27017
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - agentverse-net
+
+  notification-agent:
+    build:
+      context: ..
+      dockerfile: backend/executive_agents/Dockerfile.executive
+      args:
+        - AGENT_DIR=backend/executive_agents/notification
+    environment:
+      - COMMANDER_URL=http://commander:8000
+      - EVENT_BUS_URL=http://eventbus:8009/api/eventbus/publish
+      - MEMORY_URL=http://memory:8102/api/memory
+      - MONGODB_URI=mongodb://mongodb:27017
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - agentverse-net
+
+  report-generator:
+    build:
+      context: ..
+      dockerfile: backend/executive_agents/Dockerfile.executive
+      args:
+        - AGENT_DIR=backend/executive_agents/report_generator
+    environment:
+      - COMMANDER_URL=http://commander:8000
+      - EVENT_BUS_URL=http://eventbus:8009/api/eventbus/publish
+      - MEMORY_URL=http://memory:8102/api/memory
+      - MONGODB_URI=mongodb://mongodb:27017
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - agentverse-net
+
+  resource-allocator:
+    build:
+      context: ..
+      dockerfile: backend/executive_agents/Dockerfile.executive
+      args:
+        - AGENT_DIR=backend/executive_agents/resource_allocator
+    environment:
+      - COMMANDER_URL=http://commander:8000
+      - EVENT_BUS_URL=http://eventbus:8009/api/eventbus/publish
+      - MEMORY_URL=http://memory:8102/api/memory
+      - MONGODB_URI=mongodb://mongodb:27017
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - agentverse-net
+
+  workflow-manager-agent:
+    build:
+      context: ..
+      dockerfile: backend/executive_agents/Dockerfile.executive
+      args:
+        - AGENT_DIR=backend/executive_agents/workflow_manager
+    environment:
+      - COMMANDER_URL=http://commander:8000
+      - EVENT_BUS_URL=http://eventbus:8009/api/eventbus/publish
+      - MEMORY_URL=http://memory:8102/api/memory
+      - MONGODB_URI=mongodb://mongodb:27017
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - agentverse-net
+
+  # ==========================================
+  # API GATEWAY & FRONTEND
+  # ==========================================
+  commander:
+    build: 
+      context: ../backend
+      dockerfile: Dockerfile.infra
+      args:
+        - SERVICE_NAME=commander
+    ports:
+      - "8000:8000"
+    environment:
+      - WORKFLOW_URL=http://workflow:8103/api/workflow/initiate
+      - MEMORY_URL=http://memory:8102/api/memory
+      - EVENT_BUS_URL=http://eventbus:8009/api/eventbus/publish
+    networks:
+      - agentverse-net
+    depends_on:
+      - security
+      - eventbus
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    networks:
+      - agentverse-net
+    depends_on:
+      - commander

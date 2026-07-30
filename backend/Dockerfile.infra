@@ -1,0 +1,17 @@
+FROM python:3.11-slim
+WORKDIR /app
+
+# Accept the service folder name (e.g. eventbus, workflow, memory)
+ARG SERVICE_NAME
+
+COPY ${SERVICE_NAME}/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the specific service folder
+COPY ${SERVICE_NAME} .
+
+# Copy the shared models so they are available to the service
+COPY shared /app/shared
+
+EXPOSE 8000
+CMD ["python", "main.py"]

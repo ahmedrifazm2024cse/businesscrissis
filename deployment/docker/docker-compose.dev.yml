@@ -1,0 +1,33 @@
+version: "3.8"
+
+# Development overrides
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  frontend:
+    build:
+      target: development # Assuming multi-stage dev target
+    volumes:
+      - ../../frontend/src:/app/src
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "5173:5173" # Vite dev server
+    command: npm run dev -- --host 0.0.0.0
+
+  commander:
+    volumes:
+      - ../../backend/commander:/app
+    environment:
+      - ENV=development
+      - LOG_LEVEL=DEBUG
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Expose Redis and Postgres ports for local inspection
+  postgres:
+    ports:
+      - "5432:5432"
+
+  redis:
+    ports:
+      - "6379:6379"

@@ -1,0 +1,6 @@
+competitor_id,name,product_name,feature_set,market_share,pricing_tier,sentiment_score,last_launch_date,status
+1,Competitor Alpha,AlphaFlow,"Cloud integrations, Real-time sync, Advanced AI insights",22.5,Premium,0.85,2026-03-15,Active
+2,Competitor Beta,BetaCRM,"Basic contacts, Sales pipeline, Email templates",15.2,Standard,0.62,2025-11-10,Active
+3,Competitor Gamma,GammaData,"Data lake integrations, BI analytics, Custom reporting",18.0,Enterprise,0.78,2026-06-01,Active
+4,Competitor Delta,DeltaMobile,"iOS/Android app, Offline mode, Field operations",9.4,Standard,0.45,2026-01-20,Needs Improvement
+5,Competitor Epsilon,EpsilonSec,"End-to-end encryption, Compliance audits, Identity management",12.1,Premium,0.92,2026-07-01,Highly Active

@@ -1,0 +1,12 @@
+competitor_name,plan_name,price_monthly,billing_cycle,features_included,last_updated
+Competitor Alpha,Starter,49.00,Monthly,"Basic CRM, 5 Users, Standard Support",2026-03-15
+Competitor Alpha,Pro,149.00,Monthly,"Advanced CRM, 20 Users, Priority Support",2026-03-15
+Competitor Alpha,Enterprise,299.00,Monthly,"Full Suite, Unlimited Users, Dedicated Manager, AI insights",2026-07-27
+Competitor Beta,Basic,29.00,Monthly,"Contacts management, 3 Users",2025-11-10
+Competitor Beta,Premium,89.00,Monthly,"Sales pipeline, custom templates, 15 Users",2025-11-10
+Competitor Gamma,Core,199.00,Monthly,"Analytics dashboard, 10 data sources",2026-06-01
+Competitor Gamma,Ultimate,499.00,Monthly,"Enterprise data lake sync, custom models, 24/7 SLA",2026-06-01
+Competitor Delta,Standard,39.00,Monthly,"Field service app, 5 mobile devices",2026-01-20
+Competitor Delta,Pro,99.00,Monthly,"Advanced dispatching, offline capabilities",2026-01-20
+Competitor Epsilon,Secure Starter,99.00,Monthly,"Identity verification, 50 employee licenses",2026-07-01
+Competitor Epsilon,Secure Enterprise,399.00,Monthly,"Full compliance audit, unlimited employees, custom SSO",2026-07-01

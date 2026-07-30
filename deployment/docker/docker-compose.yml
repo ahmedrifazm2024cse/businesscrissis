@@ -1,0 +1,187 @@
+version: "3.8"
+
+networks:
+  agentverse-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+
+services:
+  # ==========================================
+  # EDGE & FRONTEND
+  # ==========================================
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - agentverse-net
+    depends_on:
+      - frontend
+      - commander
+
+  frontend:
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile
+    networks:
+      - agentverse-net
+    restart: unless-stopped
+
+  # ==========================================
+  # API GATEWAY
+  # ==========================================
+  commander:
+    build: 
+      context: ../../backend/commander
+      dockerfile: ../Dockerfile.template
+    environment:
+      - ENV=production
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - agentverse-net
+    restart: unless-stopped
+    depends_on:
+      - security
+      - eventbus
+
+  # ==========================================
+  # DATA STORES
+  # ==========================================
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=agentverse
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - agentverse-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:alpine
+    volumes:
+      - redis_data:/data
+    networks:
+      - agentverse-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+
+  # ==========================================
+  # INFRASTRUCTURE SERVICES
+  # ==========================================
+  security:
+    build: { context: ../../backend/security, dockerfile: ../Dockerfile.template }
+    networks: [agentverse-net]
+  
+  eventbus:
+    build: { context: ../../backend/eventbus, dockerfile: ../Dockerfile.template }
+    networks: [agentverse-net]
+
+  memory:
+    build: { context: ../../backend/memory, dockerfile: ../Dockerfile.template }
+    networks: [agentverse-net]
+
+  workflow:
+    build: { context: ../../backend/workflow, dockerfile: ../Dockerfile.template }
+    networks: [agentverse-net]
+
+  monitoring:
+    build: { context: ../../backend/monitoring, dockerfile: ../Dockerfile.template }
+    networks: [agentverse-net]
+
+  metrics:
+    build: { context: ../../backend/metrics, dockerfile: ../Dockerfile.template }
+    networks: [agentverse-net]
+
+  audit:
+    build: { context: ../../backend/audit, dockerfile: ../Dockerfile.template }
+    networks: [agentverse-net]
+    depends_on: [postgres]
+
+  config:
+    build: { context: ../../backend/config, dockerfile: ../Dockerfile.template }
+    networks: [agentverse-net]
+
+  scheduler:
+    build: { context: ../../backend/scheduler, dockerfile: ../Dockerfile.template }
+    networks: [agentverse-net]
+
+  cache:
+    build: { context: ../../backend/cache, dockerfile: ../Dockerfile.template }
+    networks: [agentverse-net]
+    depends_on: [redis]
+
+  analytics:
+    build: { context: ../../backend/analytics, dockerfile: ../Dockerfile.template }
+    networks: [agentverse-net]
+
+  # ==========================================
+  # EXECUTIVE AGENTS
+  # ==========================================
+  decision-agent:
+    build: { context: ../../backend/executive_agents/decision, dockerfile: ../../Dockerfile.template }
+    networks: [agentverse-net]
+
+  workflow-manager-agent:
+    build: { context: ../../backend/executive_agents/workflow_manager, dockerfile: ../../Dockerfile.template }
+    networks: [agentverse-net]
+
+  communication-pr-agent:
+    build: { context: ../../backend/executive_agents/communication_pr, dockerfile: ../../Dockerfile.template }
+    networks: [agentverse-net]
+
+  resource-allocator-agent:
+    build: { context: ../../backend/executive_agents/resource_allocator, dockerfile: ../../Dockerfile.template }
+    networks: [agentverse-net]
+
+  notification-agent:
+    build: { context: ../../backend/executive_agents/notification, dockerfile: ../../Dockerfile.template }
+    networks: [agentverse-net]
+
+  report-generator-agent:
+    build: { context: ../../backend/executive_agents/report_generator, dockerfile: ../../Dockerfile.template }
+    networks: [agentverse-net]
+
+  knowledge-manager-agent:
+    build: { context: ../../backend/executive_agents/knowledge_manager, dockerfile: ../../Dockerfile.template }
+    networks: [agentverse-net]
+
+  # ==========================================
+  # BUSINESS AGENTS
+  # ==========================================
+  customer-reputation-agent:
+    build: { context: ../../Customer_Reputation, dockerfile: backend/Dockerfile }
+    networks: [agentverse-net]
+
+  market-intelligence-agent:
+    build: { context: ../../market-intelligence-agent, dockerfile: backend/Dockerfile }
+    networks: [agentverse-net]
+
+  financial-agent:
+    build: { context: ../../financialagent, dockerfile: backend/Dockerfile }
+    networks: [agentverse-net]
+
+  supply-agent:
+    build: { context: ../../supplyagent, dockerfile: backend/Dockerfile }
+    networks: [agentverse-net]
+
+  cyber-agent:
+    build: { context: ../../cyberagent, dockerfile: backend/Dockerfile }
+    networks: [agentverse-net]
+
+  legal-compliance-agent:
+    build: { context: ../../legalcomplianceagent, dockerfile: backend/Dockerfile }
+    networks: [agentverse-net]

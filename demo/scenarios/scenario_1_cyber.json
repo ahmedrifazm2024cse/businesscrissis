@@ -1,0 +1,11 @@
+{
+  "scenario_id": "cyber_001",
+  "name": "Ransomware Attack on Core Databases",
+  "category": "Cyber Security",
+  "severity": "CRITICAL",
+  "payload": {
+    "query": "A massive ransomware attack has encrypted our core customer databases in the EU region. The attackers are demanding $5M in Bitcoin within 24 hours.",
+    "affected_systems": ["eu-db-primary", "eu-db-replica"],
+    "urgency": "Immediate"
+  }
+}
